@@ -1,0 +1,14 @@
+.container-input {
+  display: inline-flex;
+  width: 100%;
+}
+.input-password {
+  position: relative;
+}
+
+.view-icon {
+  position: absolute;
+  right: 10px;
+  top: 60%;
+  z-index: 10;
+}

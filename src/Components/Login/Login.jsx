@@ -12,13 +12,16 @@ import { Button,
   ModalOverlay,
   VStack
 } from "@chakra-ui/react"
+import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons"
+import style from './Login.module.css'
 import PropTypes from "prop-types"
-import { useEffect, useRef } from "react"
-import useResponsive from "../hook/use-responsive"
-import { useLogin } from "../hook/use-auth"
+import { useEffect, useRef, useState } from "react"
+import useResponsive from "../../hook/use-responsive"
+import { useLogin } from "../../hook/use-auth"
 import { useForm } from "react-hook-form"
 
 const Login = ({ isOpen, setIsOpen }) => {
+  const [isShowPassword, setIsShowPassword] = useState(false)
   const initialRef = useRef(null)
   const finalRef = useRef(null)
   const { isMobile } = useResponsive()
@@ -36,7 +39,7 @@ const Login = ({ isOpen, setIsOpen }) => {
       reset()
       setIsOpen(false)
     }
-  }, [isSuccess])
+  }, [isSuccess, reset, setIsOpen])
 
   const onSubmit = (data) => {
     console.log(data)
@@ -77,11 +80,21 @@ const Login = ({ isOpen, setIsOpen }) => {
 
           <FormControl mt={4} isInvalid={!!errors.email}>
             <FormLabel>Password</FormLabel>
-            <Input 
-              placeholder="Password" 
-              type="password" 
-              {...register('password', { required: 'Password is required' })}
+            <div className={style['container-input']}>
+              <Input 
+                placeholder="Password" 
+                type={isShowPassword ? 'text' : 'password'}
+                {...register('password', { required: 'Password is required' })}
+                className={style['input-password']}
               />
+                {
+                  isShowPassword ? (
+                    <ViewIcon className={style['view-icon']} boxSize={5} cursor={'pointer'} onClick={() => setIsShowPassword(!isShowPassword)}/>
+                  ) : (
+                    <ViewOffIcon className={style['view-icon']} boxSize={5} cursor={'pointer'} onClick={() => setIsShowPassword(!isShowPassword)}/>
+                  )
+                }
+            </div>
             <FormErrorMessage>
               {errors.password && errors.password.message}
             </FormErrorMessage>

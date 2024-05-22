@@ -2,10 +2,11 @@ import io from 'socket.io-client'
 import { useEffect, useState } from 'react'
 import style from './Home.module.css'
 import { Button, Text } from '@chakra-ui/react';
-import Register from '../Components/Register';
-import Login from '../Components/Login';
+import Register from '../Components/Register/Register';
+import Login from '../Components/Login/Login';
 import { getToken } from '../hook/use-token';
 import { setTime } from '../utils/setTime';
+import { useLogout } from '../hook/use-auth';
 
 const socket = io('/', {
   auth: {
@@ -20,6 +21,7 @@ function Home() {
   const [isOpenRegister, setIsOpenRegister] = useState(false)
   const [isOpenLogin, setIsOpenLogin] = useState(false)
   const isAuthenticated = localStorage.getItem('token')
+  const { logout: logOut } = useLogout()
 
   useEffect(() => {
     socket.on('message', reciveMessage)
@@ -42,6 +44,9 @@ function Home() {
     setMessage('')
   }
   const userName = localStorage.getItem('username')
+  const handleLogout = () => {
+    logOut()
+  }
 
   return (
     <div className={style['container']}>
@@ -75,7 +80,7 @@ function Home() {
             mt={4}
             ml={6}
             colorScheme='blue'
-            onClick={() => setIsOpenLogin(true)}
+            onClick={() => handleLogout()}
           >
             Log Out
           </Button>
