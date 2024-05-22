@@ -13,4 +13,5 @@ export default axiosInstance
 export const API_ENDPOINTS = {
   register: '/api/register',
   login: '/api/login',
+  getUser: '/api/user',
 }

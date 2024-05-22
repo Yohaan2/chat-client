@@ -4,9 +4,10 @@ import style from './Home.module.css'
 import { Button, Text } from '@chakra-ui/react';
 import Register from '../Components/Register/Register';
 import Login from '../Components/Login/Login';
-import { getToken } from '../hook/use-token';
 import { setTime } from '../utils/setTime';
 import { useLogout } from '../hook/use-auth';
+import { getToken } from '../hook/use-token';
+import Search from '../Components/Search/Search';
 
 const socket = io('/', {
   auth: {
@@ -17,39 +18,64 @@ const socket = io('/', {
 function Home() {
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState([])
-  const [user, setUser] = useState('')
+  const [selectedUserId, setSelectedUserId] = useState('')
   const [isOpenRegister, setIsOpenRegister] = useState(false)
   const [isOpenLogin, setIsOpenLogin] = useState(false)
+  const [isShow, setIsShow] = useState(false)
+  const [users, setUsers] = useState([])
   const isAuthenticated = localStorage.getItem('token')
   const { logout: logOut } = useLogout()
+  console.log(users[0])
 
   useEffect(() => {
-    socket.on('message', reciveMessage)
+    socket.on('user_connected', userConnected)
+    // socket.on('receive_message', (data) => {
+    //   setMessages(prev => [...prev, data])
+    // })
     return () => {
-      socket.off('message', reciveMessage)
+      socket.off('user_connected', userConnected)
+    }
+  }, [])
+
+  useEffect(() => {
+    socket.on('receive_message', (data) => {
+      console.log(data)
+      setMessages(prev => [...prev, data])
+    })
+    return () => {
+      socket.off('receive_message', (data) => {
+        setMessages(prev => [...prev, data])
+      })
     }
   }, [])
 
   useEffect(() => {
   }, [isAuthenticated])
   
-  const reciveMessage = (msg) => {
-    setMessages(prev => [...prev, msg])
-    setUser(msg.from)
+  const userConnected = (data) => {
+    setSelectedUserId(data.userID)
+    setUsers(prev => [...prev, data.users])
+    // setMessages(prev => [...prev, msg])
+    // setUser(msg.from)
   }
   
   const handleSubmit = (e) => {
     e.preventDefault()
-    socket.emit('message', message)
-    setMessage('')
+    if (selectedUserId){
+      socket.emit('send_message_to_user', {
+        to: "664e32a37b8845fa0d9f35ff",
+        message
+      })
+      setMessage('')
+    }
   }
-  const userName = localStorage.getItem('username')
+
   const handleLogout = () => {
     logOut()
   }
 
   return (
-    <div className={style['container']}>
+    <div className={style['container']} >
       {
         !isAuthenticated && (
           <>
@@ -87,17 +113,20 @@ function Home() {
         )
       }
     <Text fontSize='3xl' fontWeight={700} align='center'>Chat</Text>
-    <div className={style['chat-container']}>
+    <div className={style['search-container']}>
+      <Search isShow={isShow} setIsShow={setIsShow} />
+    </div>
+    <div className={style['chat-container']} onClick={() => setIsShow(false)}>
       <div className={style['chat-header']}>
-        <ul className={user === userName ? style['chat-messages'] : style['chat-messages-other']}>
+        <ul className={style['chat-messages']}>
           { 
             messages.map((msg, i) => {
               return (
                 <div className={style['message-container']} key={i}>
-                  <small className={style['message-name']}>{user === userName ? 'Me' : msg.from}</small>
+                  <small className={style['message-name']}>{msg.from}</small>
                   <div className={style['messages-list']} >
                     <li key={i}>
-                    {msg.body}
+                    {msg.message}
                     </li>
                     <span className={style['time']}> {setTime()}</span>
                   </div>
@@ -115,6 +144,13 @@ function Home() {
     </div>
     <Register isOpen={isOpenRegister} setIsOpen={setIsOpenRegister} setIsOpenLogin={setIsOpenLogin} />
     <Login isOpen={isOpenLogin} setIsOpen={setIsOpenLogin} /> 
+    {
+      selectedUserId && (
+        <div>
+          <small>{selectedUserId}</small>
+        </div>
+      )
+    }
   </div>
   )
 }

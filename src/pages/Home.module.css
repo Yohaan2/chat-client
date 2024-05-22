@@ -1,3 +1,4 @@
+
 .container {
   background-color: rgba(34,193,195, 0.4);
 }
@@ -18,7 +19,7 @@ h1 {
 
 .chat-header {
   background-color: rgb(0, 60, 100);
-  width: 320px;
+  width: 350px;
   border: 1px solid #09445f;
   height: 100%;
   overflow: hidden;
@@ -54,7 +55,7 @@ h1 {
   padding: 0;
   height: 100%;
   padding: 18px;
-  overflow-y: scroll;
+  overflow-y: auto;
   padding-bottom: 50px;
   scroll-behavior: smooth;
   text-wrap: balance;
@@ -121,4 +122,11 @@ h1 {
   margin-left: 10px;
   font-size: 14px;
   letter-spacing: 1px;
+}
+
+.search-container {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  margin-top: 20px;
 }
