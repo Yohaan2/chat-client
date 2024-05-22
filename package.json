@@ -10,9 +10,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.8.2",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@iconify/react": "^4.1.1",
+    "@tanstack/react-query": "^5.37.1",
+    "axios": "^1.7.1",
+    "framer-motion": "^11.2.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.51.4",
+    "react-responsive": "^10.0.0",
     "socket.io-client": "^4.7.5",
+    "ui": "^0.2.4",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

@@ -107,6 +107,7 @@ h1 {
   align-items: end;
   justify-content: space-between;
   gap: 10px;
+  color: #fff;
 }
 
 .time {
