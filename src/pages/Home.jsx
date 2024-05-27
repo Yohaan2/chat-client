@@ -1,5 +1,5 @@
 import io from 'socket.io-client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import style from './Home.module.css'
 import { Box, Button, Center, Text } from '@chakra-ui/react';
 import Register from '../Components/Register/Register';
@@ -26,6 +26,7 @@ function Home() {
   const isAuthenticated = useAutheticated()
   const token = getToken()
   const setUsers = useStore((state) => state.setUsers)
+  const ref = useRef(null)
 
   useEffect(() => {
     socket.on('user_connected', userConnected)
@@ -64,6 +65,9 @@ function Home() {
   
   const receiveMessage = (data) => {
     setMessages(prev => [...prev, data])
+    ref.current?.scrollTo({
+        top: ref.current.scrollHeight
+      })
   }
   
   const handleSubmit = (e) => {
@@ -85,6 +89,9 @@ function Home() {
       }
       setMessages(prev => [...prev, newMessage])
       setMessage('')
+      ref.current?.scrollTo({
+        top: ref.current.scrollHeight,
+      })
     }
   }
 
@@ -171,14 +178,14 @@ function Home() {
       }
     <div className={style['chat-container']} onClick={() => setIsShow(false)}>
       <div className={style['chat-header']}>
-        <ul className={style['chat-messages']}>
+        <ul className={style['chat-messages']} ref={ref}>
           { 
             messages.map((msg, i) => {
               return (
                 <div className={`${
                   msg.from === 'Me' ? 
                   style['message-container'] : 
-                  style['message-container-other']}`} key={i}>
+                  style['message-container-other']}`} key={i} >
                   <small className={style['message-name']}>{msg.from}</small>
                   <div className={style['messages-list']} >
                     <li key={i}>
