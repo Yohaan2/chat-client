@@ -30,7 +30,7 @@ h1 {
 .chat-form {
   bottom: 0;
   display: flex;
-  height: 48px;
+  height: 45px;
   left: 0;
   position: absolute;
   right: 0;
@@ -50,44 +50,38 @@ h1 {
 
 .chat-messages {
   list-style: none;
-  font-size: 20px;
+  font-size: 16px;
   margin: 0;
   padding: 0;
   height: 100%;
-  padding: 18px;
+  padding: 10px;
   overflow-y: auto;
   padding-bottom: 50px;
   scroll-behavior: smooth;
   text-wrap: balance;
   text-wrap: pretty;
   word-wrap: break-word;
-  position: absolute;
-  right: 0;
+  position: relative;
 }
 
-.chat-messages-other {
-  list-style: none;
-  font-size: 20px;
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  padding: 18px;
-  overflow-y: auto;
-  padding-bottom: 50px;
-  scroll-behavior: smooth;
-  text-wrap: balance;
-  text-wrap: pretty;
-  word-wrap: break-word;
-  position: absolute;
-  left: 0;
+.message-container {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
 }
+.messages-container-other {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+}
+
 
 .chat-input {
   border-radius: 9999px;
   flex: 1;
   padding: 0 8px;
   border: none;
-  font-size: 18px;
+  font-size: 15px;
 }
 .chat-input::placeholder {
   color: rgb(134, 134, 134);
@@ -100,7 +94,7 @@ h1 {
 
 .messages-list {
   background-color: rgb(0, 36, 59);
-  padding: 10px 25px;
+  padding: 8px 20px;
   width: fit-content;
   border-radius: 999px;
   margin-bottom: 5px;
@@ -113,7 +107,7 @@ h1 {
 
 .time {
   color: rgb(134, 134, 134);
-  font-size: 14px;
+  font-size: 12px;
   bottom: 5px;
 }
 
@@ -122,6 +116,7 @@ h1 {
   margin-left: 10px;
   font-size: 14px;
   letter-spacing: 1px;
+  padding: 0 10px;
 }
 
 .search-container {

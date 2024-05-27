@@ -19,33 +19,39 @@ function Home() {
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState([])
   const [selectedUserId, setSelectedUserId] = useState('')
+  const [selectedUser, setSelectedUser] = useState({})
   const [isOpenRegister, setIsOpenRegister] = useState(false)
   const [isOpenLogin, setIsOpenLogin] = useState(false)
   const [isShow, setIsShow] = useState(false)
   const [users, setUsers] = useState([])
+  const [user, setUser] = useState([])
   const isAuthenticated = localStorage.getItem('token')
   const { logout: logOut } = useLogout()
-  console.log(users[0])
+  
+  useEffect(() => {
+    if(users.length > 0)
+    Object.keys(users[0]).forEach((key) => {
+      const obj = {
+        username: users[0][key].username,
+        socketID: users[0][key].socketID,
+        id: key
+      }
+      setUser(prev => [...prev, obj])
+    })
+    
+  }, [users])
 
   useEffect(() => {
     socket.on('user_connected', userConnected)
-    // socket.on('receive_message', (data) => {
-    //   setMessages(prev => [...prev, data])
-    // })
     return () => {
       socket.off('user_connected', userConnected)
     }
-  }, [])
+  }, [socket])
 
   useEffect(() => {
-    socket.on('receive_message', (data) => {
-      console.log(data)
-      setMessages(prev => [...prev, data])
-    })
+    socket.on('receive_message', receiveMessage)
     return () => {
-      socket.off('receive_message', (data) => {
-        setMessages(prev => [...prev, data])
-      })
+      socket.off('receive_message', receiveMessage)
     }
   }, [])
 
@@ -55,17 +61,24 @@ function Home() {
   const userConnected = (data) => {
     setSelectedUserId(data.userID)
     setUsers(prev => [...prev, data.users])
-    // setMessages(prev => [...prev, msg])
-    // setUser(msg.from)
+  }
+  
+  const receiveMessage = (data) => {
+    setMessages(prev => [...prev, data])
   }
   
   const handleSubmit = (e) => {
     e.preventDefault()
     if (selectedUserId){
       socket.emit('send_message_to_user', {
-        to: "664e32a37b8845fa0d9f35ff",
+        to: selectedUser.id,
         message
       })
+      const newMessage = {
+        from: 'Me',
+        message
+      }
+      setMessages(prev => [...prev, newMessage])
       setMessage('')
     }
   }
@@ -114,15 +127,23 @@ function Home() {
       }
     <Text fontSize='3xl' fontWeight={700} align='center'>Chat</Text>
     <div className={style['search-container']}>
-      <Search isShow={isShow} setIsShow={setIsShow} />
+      <Search isShow={isShow} setIsShow={setIsShow} users={user} setSelectedUser={setSelectedUser}/>
     </div>
+      {
+        selectedUser  ?  (
+          <span>{selectedUser.username}</span>
+        ): null
+      }
     <div className={style['chat-container']} onClick={() => setIsShow(false)}>
       <div className={style['chat-header']}>
         <ul className={style['chat-messages']}>
           { 
             messages.map((msg, i) => {
               return (
-                <div className={style['message-container']} key={i}>
+                <div className={`${
+                  msg.from === 'Me' ? 
+                  style['message-container'] : 
+                  style['message-container-other']}`} key={i}>
                   <small className={style['message-name']}>{msg.from}</small>
                   <div className={style['messages-list']} >
                     <li key={i}>

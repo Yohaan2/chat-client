@@ -2,7 +2,7 @@ import { Input, Icon } from '@chakra-ui/react'
 import { Search2Icon } from '@chakra-ui/icons'
 import style from './Search.module.css'
 import PropTypes from 'prop-types'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const CircleIcon = (props) => (
   <Icon viewBox='0 0 200 200' {...props}>
@@ -13,9 +13,13 @@ const CircleIcon = (props) => (
   </Icon>
 )
 
-const Search = ({ isShow, setIsShow }) => {
+const Search = ({ isShow, setIsShow, users, setSelectedUser }) => {
   const [search, setSearch] = useState('')
   const [suggestions, setSuggestions] = useState([]);
+
+  useEffect(() => {
+
+  }, [users])
 
   const handleSearch = (e) => {
     const value = e.target.value
@@ -25,8 +29,16 @@ const Search = ({ isShow, setIsShow }) => {
   }
 
   const getSuggestions = (value) => {
-    const terms = ['apple', 'banana', 'orange', 'mango'];
-    return terms.filter((term) => term.toLowerCase().includes(value.toLowerCase()))
+    if(users.length > 0){
+      const usernames = users.filter((term) => term.username.toLowerCase().includes(value.toLowerCase()))
+      return usernames
+    }
+  }
+
+  const selectUser = (user) => {
+    setSearch('')
+    setIsShow(false)
+    setSelectedUser(user)
   }
   return (
     <div>
@@ -59,13 +71,13 @@ const Search = ({ isShow, setIsShow }) => {
             ) :
             suggestions?.map((suggestion, i) => {
               return (
-                <div key={i} className={style['suggestions-item']}>
+                <div key={i} className={style['suggestions-item']} onClick={() => selectUser(suggestion)}>
                   <li className={style['suggestions-item-text']}>
                     <div className={style['suggestions-item-text-circle']}>
                       <small>Online</small>
                       <CircleIcon boxSize={2} color={'#54F54F'} className={style['circle-icon']} backgroundColor={'green'}/>
                     </div>
-                    <span>{suggestion}</span>
+                    <span>{suggestion.username}</span>
                   </li>
                 </div>
               )
@@ -79,6 +91,8 @@ const Search = ({ isShow, setIsShow }) => {
 Search.propTypes = {
   isShow: PropTypes.bool,
   setIsShow: PropTypes.func,
+  users: PropTypes.array,
+  setSelectedUser: PropTypes.func,
 }
 
 export default Search
