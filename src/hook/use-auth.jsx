@@ -47,7 +47,7 @@ export const useLogin = () => {
     mutationFn: login,
     onSuccess: (data) => {
       localStorage.setItem('token', data.token)
-      window.location.reload()
+      // window.location.reload()
       toast({
         title: "Logged in",
         description: "You're now logged in.",
@@ -90,3 +90,7 @@ export const useLogout = () => {
     }
   }
 };
+
+export const useAutheticated = () => {
+  return localStorage.getItem('token')
+}

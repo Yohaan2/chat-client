@@ -42,7 +42,6 @@ const Login = ({ isOpen, setIsOpen }) => {
   }, [isSuccess, reset, setIsOpen])
 
   const onSubmit = (data) => {
-    console.log(data)
     mutate(data)
   }
 

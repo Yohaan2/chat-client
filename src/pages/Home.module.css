@@ -18,7 +18,7 @@ h1 {
 }
 
 .chat-header {
-  background-color: rgb(0, 60, 100);
+  background-color: #003c64;
   width: 350px;
   border: 1px solid #09445f;
   height: 100%;
@@ -46,6 +46,11 @@ h1 {
   padding: 0 16px;
   font-weight: bold;
   font-size: 16px;
+}
+
+.chat-form > button:disabled {
+  background-color: rgb(86, 184, 250);
+  cursor: default;
 }
 
 .chat-messages {

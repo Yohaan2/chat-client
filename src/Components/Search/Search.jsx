@@ -1,38 +1,36 @@
-import { Input, Icon } from '@chakra-ui/react'
+import { Input } from '@chakra-ui/react'
 import { Search2Icon } from '@chakra-ui/icons'
 import style from './Search.module.css'
 import PropTypes from 'prop-types'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { CircleIcon } from '../Icon/CircleIcon'
+import { useUser } from '../../hook/useUser'
+import { useAutheticated } from '../../hook/use-auth'
+import { useStore } from '../../store/users'
 
-const CircleIcon = (props) => (
-  <Icon viewBox='0 0 200 200' {...props}>
-    <path
-      fill='currentColor'
-      d='M 100, 100 m -75, 0 a 75,75 0 1,0 150,0 a 75,75 0 1,0 -150,0'
-    />
-  </Icon>
-)
-
-const Search = ({ isShow, setIsShow, users, setSelectedUser }) => {
+const Search = ({ isShow, setIsShow, setSelectedUser }) => {
   const [search, setSearch] = useState('')
   const [suggestions, setSuggestions] = useState([]);
-
-  useEffect(() => {
-
-  }, [users])
-
+  const isAuthenticated = useAutheticated()
+  const { data } = useUser(isAuthenticated)
+  const usersConnect = useStore((state) => state.users)
+  
   const handleSearch = (e) => {
     const value = e.target.value
     setSearch(value)
     setSuggestions(getSuggestions(value))
     setIsShow(true)
   }
-
+  
   const getSuggestions = (value) => {
-    if(users.length > 0){
-      const usernames = users.filter((term) => term.username.toLowerCase().includes(value.toLowerCase()))
-      return usernames
+    if(usersConnect.length > 0){
+      let usernames = usersConnect.filter((term) => term.username.toLowerCase().includes(value.toLowerCase()))
+      usernames = usernames.filter((user) => user.username !== data.username)
+
+      const newUsernames = new Set(usernames)
+      return [...newUsernames]
     }
+    return []
   }
 
   const selectUser = (user) => {
@@ -66,7 +64,7 @@ const Search = ({ isShow, setIsShow, users, setSelectedUser }) => {
       </div>
         <ul className={`${!search || !isShow ? style['suggestions-not-display'] :  style['suggestions']}`}>
           {
-            suggestions.length === 0 ? (
+            suggestions?.length === 0 ? (
               <li className={style['not-found']}>Not found...</li>
             ) :
             suggestions?.map((suggestion, i) => {

@@ -1,19 +1,18 @@
 import io from 'socket.io-client'
 import { useEffect, useState } from 'react'
 import style from './Home.module.css'
-import { Button, Text } from '@chakra-ui/react';
+import { Box, Button, Center, Text } from '@chakra-ui/react';
 import Register from '../Components/Register/Register';
 import Login from '../Components/Login/Login';
 import { setTime } from '../utils/setTime';
-import { useLogout } from '../hook/use-auth';
+import { useAutheticated, useLogout } from '../hook/use-auth';
 import { getToken } from '../hook/use-token';
 import Search from '../Components/Search/Search';
+import { CloseIcon } from '@chakra-ui/icons';
+import { CircleIcon } from '../Components/Icon/CircleIcon';
+import { useStore } from '../store/users';
 
-const socket = io('/', {
-  auth: {
-    token: getToken(),
-  },
-})
+const socket = io('/')
 
 function Home() {
   const [message, setMessage] = useState('')
@@ -23,30 +22,18 @@ function Home() {
   const [isOpenRegister, setIsOpenRegister] = useState(false)
   const [isOpenLogin, setIsOpenLogin] = useState(false)
   const [isShow, setIsShow] = useState(false)
-  const [users, setUsers] = useState([])
-  const [user, setUser] = useState([])
-  const isAuthenticated = localStorage.getItem('token')
   const { logout: logOut } = useLogout()
-  
-  useEffect(() => {
-    if(users.length > 0)
-    Object.keys(users[0]).forEach((key) => {
-      const obj = {
-        username: users[0][key].username,
-        socketID: users[0][key].socketID,
-        id: key
-      }
-      setUser(prev => [...prev, obj])
-    })
-    
-  }, [users])
+  const isAuthenticated = useAutheticated()
+  const token = getToken()
+  const setUsers = useStore((state) => state.setUsers)
 
   useEffect(() => {
     socket.on('user_connected', userConnected)
     return () => {
       socket.off('user_connected', userConnected)
     }
-  }, [socket])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     socket.on('receive_message', receiveMessage)
@@ -56,11 +43,23 @@ function Home() {
   }, [])
 
   useEffect(() => {
-  }, [isAuthenticated])
+    socket.emit('authentication', token)
+  }, [isAuthenticated, token])
   
   const userConnected = (data) => {
     setSelectedUserId(data.userID)
-    setUsers(prev => [...prev, data.users])
+    let users = []
+    
+    Object.keys(data.users).forEach((key) => {
+      const obj = {
+        username: data.users[key].username,
+        socketID: data.users[key].socketID,
+        id: key
+      }
+      users.push(obj)
+    })
+    setUsers(users)
+
   }
   
   const receiveMessage = (data) => {
@@ -69,14 +68,20 @@ function Home() {
   
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (selectedUserId){
-      socket.emit('send_message_to_user', {
-        to: selectedUser.id,
-        message
-      })
-      const newMessage = {
-        from: 'Me',
-        message
+    const newMessage = {
+      from: 'Me',
+      message
+    }
+    if (message.length > 0){
+      if (selectedUserId){
+        socket.emit('send_message_to_user', {
+          to: selectedUser.id,
+          message
+        })
+      } else {
+        socket.emit('anonymous_message', {
+          message
+        })
       }
       setMessages(prev => [...prev, newMessage])
       setMessage('')
@@ -84,6 +89,10 @@ function Home() {
   }
 
   const handleLogout = () => {
+    socket.emit('logout', {
+      token: 'Anonymous',
+      userID: selectedUserId
+    })
     logOut()
   }
 
@@ -127,11 +136,37 @@ function Home() {
       }
     <Text fontSize='3xl' fontWeight={700} align='center'>Chat</Text>
     <div className={style['search-container']}>
-      <Search isShow={isShow} setIsShow={setIsShow} users={user} setSelectedUser={setSelectedUser}/>
+      <Search isShow={isShow} setIsShow={setIsShow} setSelectedUser={setSelectedUser}/>
     </div>
       {
-        selectedUser  ?  (
-          <span>{selectedUser.username}</span>
+        selectedUser?.username ? (
+          <div>
+            <Center h={10} mt={4}>
+              <Box 
+                p={'8px 15px'} 
+                bg='#003c64' 
+                borderRadius='md' 
+                fontWeight={700} 
+                color={'white'} 
+                display={'flex'} 
+                alignItems={'center'} 
+                justifyContent={'space-between'}
+              >
+                <CircleIcon 
+                  boxSize={2} 
+                  color={'#54F54F'}
+                  mr={2}
+                  />
+                <span>{selectedUser.username}</span>
+                <CloseIcon 
+                  boxSize={2.5} 
+                  ml={3}
+                  onClick={() => setSelectedUser(null)}
+                  cursor={'pointer'}
+                  />
+              </Box>
+            </Center>
+          </div>
         ): null
       }
     <div className={style['chat-container']} onClick={() => setIsShow(false)}>
@@ -156,8 +191,15 @@ function Home() {
           })}
         </ul>
         <form className={style['chat-form']} onSubmit={handleSubmit}>
-          <input className={style['chat-input']} type="text" value={message} placeholder='Write a message' onChange={(e) => setMessage(e.target.value)} />
-          <button>
+          <input 
+            className={style['chat-input']} 
+            type="text" 
+            value={message} 
+            placeholder={selectedUser?.username || token === 'Anonymous' ? 'Write a message' : 'Select a user to send a message'}
+            onChange={(e) => setMessage(e.target.value)} 
+            disabled={!(token === 'Anonymous') && !selectedUser?.username }
+            />
+          <button disabled={!(token === 'Anonymous') && !selectedUser?.username}>
             Send
           </button>
         </form>
@@ -165,13 +207,7 @@ function Home() {
     </div>
     <Register isOpen={isOpenRegister} setIsOpen={setIsOpenRegister} setIsOpenLogin={setIsOpenLogin} />
     <Login isOpen={isOpenLogin} setIsOpen={setIsOpenLogin} /> 
-    {
-      selectedUserId && (
-        <div>
-          <small>{selectedUserId}</small>
-        </div>
-      )
-    }
+
   </div>
   )
 }
