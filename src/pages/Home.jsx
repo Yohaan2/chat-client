@@ -12,7 +12,9 @@ import { CloseIcon } from '@chakra-ui/icons';
 import { CircleIcon } from '../Components/Icon/CircleIcon';
 import { useStore } from '../store/users';
 
-const socket = io('/')
+const socket = io('https://chat-server-b4h1.onrender.com', {
+  transports: ['websocket']
+})
 
 function Home() {
   const [message, setMessage] = useState('')
