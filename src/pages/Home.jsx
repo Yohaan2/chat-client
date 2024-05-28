@@ -11,6 +11,7 @@ import Search from '../Components/Search/Search';
 import { CloseIcon } from '@chakra-ui/icons';
 import { CircleIcon } from '../Components/Icon/CircleIcon';
 import { useStore } from '../store/users';
+import { useUser } from '../hook/useUser';
 
 const socket = io('https://chat-server-b4h1.onrender.com', {
   transports: ['websocket']
@@ -19,7 +20,6 @@ const socket = io('https://chat-server-b4h1.onrender.com', {
 function Home() {
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState([])
-  const [selectedUserId, setSelectedUserId] = useState('')
   const [selectedUser, setSelectedUser] = useState({})
   const [isOpenRegister, setIsOpenRegister] = useState(false)
   const [isOpenLogin, setIsOpenLogin] = useState(false)
@@ -29,28 +29,27 @@ function Home() {
   const token = getToken()
   const setUsers = useStore((state) => state.setUsers)
   const ref = useRef(null)
+  const { data } = useUser(isAuthenticated)
 
   useEffect(() => {
     socket.on('user_connected', userConnected)
+    socket.on('receive_message', receiveMessage)
+    socket.on('user_disconnected', userConnected)
     return () => {
       socket.off('user_connected', userConnected)
+      socket.off('receive_message', receiveMessage)
+      socket.off('user_disconnected', userConnected)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
-    socket.on('receive_message', receiveMessage)
-    return () => {
-      socket.off('receive_message', receiveMessage)
+    if (token !== 'Anonymous'){
+      socket.emit('authentication', token)
     }
-  }, [])
-
-  useEffect(() => {
-    socket.emit('authentication', token)
   }, [isAuthenticated, token])
   
   const userConnected = (data) => {
-    setSelectedUserId(data.userID)
     let users = []
     
     Object.keys(data.users).forEach((key) => {
@@ -79,7 +78,7 @@ function Home() {
       message
     }
     if (message.length > 0){
-      if (selectedUserId){
+      if (token !== 'Anonymous'){
         socket.emit('send_message_to_user', {
           to: selectedUser.id,
           message
@@ -100,7 +99,7 @@ function Home() {
   const handleLogout = () => {
     socket.emit('logout', {
       token: 'Anonymous',
-      userID: selectedUserId
+      userID: data?._id
     })
     logOut()
   }
