@@ -101,6 +101,8 @@ function Home() {
       token: 'Anonymous',
       userID: data?._id
     })
+    setMessages([])
+    setSelectedUser(null)
     logOut()
   }
 
