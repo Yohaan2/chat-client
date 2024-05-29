@@ -6,6 +6,7 @@ export const useUser = (isAuthenticated) => {
     queryKey: ['user'],
     queryFn: getUser,
     refetchOnWindowFocus: false,
-    enabled: !!isAuthenticated
+    enabled: !!isAuthenticated,
+    retry: false,
   })
 }

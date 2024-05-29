@@ -47,11 +47,10 @@ export const useLogin = () => {
     mutationFn: login,
     onSuccess: (data) => {
       localStorage.setItem('token', data.token)
-      // window.location.reload()
       toast({
         title: "Logged in",
         description: "You're now logged in.",
-        duration: 9000,
+        duration: 5000,
         isClosable: true,
         position: 'top-right',
         variant:'custom',
@@ -65,9 +64,9 @@ export const useLogin = () => {
     onError: (err) => {
       toast({
         title: "Error",
-        description: err.message,
+        description: err,
         status: 'error',
-        duration: 9000,
+        duration: 5000,
         isClosable: true,
         position: 'top-right',
         variant:'custom',

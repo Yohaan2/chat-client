@@ -5,13 +5,13 @@ import { Box, Button, Center, Text } from '@chakra-ui/react';
 import Register from '../Components/Register/Register';
 import Login from '../Components/Login/Login';
 import { setTime } from '../utils/setTime';
-import { useAutheticated, useLogout } from '../hook/use-auth';
 import { getToken } from '../hook/use-token';
 import Search from '../Components/Search/Search';
 import { CloseIcon } from '@chakra-ui/icons';
 import { CircleIcon } from '../Components/Icon/CircleIcon';
 import { useStore } from '../store/users';
 import { useUser } from '../hook/useUser';
+import { useAuth } from '../Guard/AuthProvider';
 
 const socket = io('https://chat-server-b4h1.onrender.com', {
   transports: ['websocket']
@@ -24,8 +24,7 @@ function Home() {
   const [isOpenRegister, setIsOpenRegister] = useState(false)
   const [isOpenLogin, setIsOpenLogin] = useState(false)
   const [isShow, setIsShow] = useState(false)
-  const { logout: logOut } = useLogout()
-  const isAuthenticated = useAutheticated()
+  const { isAuthenticated, logOut} = useAuth()
   const token = getToken()
   const setUsers = useStore((state) => state.setUsers)
   const ref = useRef(null)
@@ -47,7 +46,9 @@ function Home() {
     if (token !== 'Anonymous'){
       socket.emit('authentication', token)
     }
-  }, [isAuthenticated, token])
+  }, [token])
+
+  useEffect(() => {}, [isAuthenticated])
   
   const userConnected = (data) => {
     let users = []
@@ -61,7 +62,6 @@ function Home() {
       users.push(obj)
     })
     setUsers(users)
-
   }
   
   const receiveMessage = (data) => {
@@ -107,7 +107,7 @@ function Home() {
   return (
     <div className={style['container']} >
       {
-        !isAuthenticated && (
+        !isAuthenticated ? (
           <>
             <Button
               mt={4}
@@ -128,10 +128,7 @@ function Home() {
               Sign In
             </Button>
           </>
-        )
-      }
-      {
-        isAuthenticated && (
+        ): (
           <Button
             mt={4}
             ml={6}

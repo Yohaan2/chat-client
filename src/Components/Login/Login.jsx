@@ -19,6 +19,7 @@ import { useEffect, useRef, useState } from "react"
 import useResponsive from "../../hook/use-responsive"
 import { useLogin } from "../../hook/use-auth"
 import { useForm } from "react-hook-form"
+import { useAuth } from "../../Guard/AuthProvider"
 
 const Login = ({ isOpen, setIsOpen }) => {
   const [isShowPassword, setIsShowPassword] = useState(false)
@@ -26,6 +27,7 @@ const Login = ({ isOpen, setIsOpen }) => {
   const finalRef = useRef(null)
   const { isMobile } = useResponsive()
   const { mutate, isPending, isSuccess } = useLogin()
+  const { login } = useAuth()
 
   const {
     register,
@@ -38,6 +40,7 @@ const Login = ({ isOpen, setIsOpen }) => {
     if (isSuccess) {
       reset()
       setIsOpen(false)
+      login()
     }
   }, [isSuccess, reset, setIsOpen])
 
